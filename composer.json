@@ -1,0 +1,30 @@
+{
+    "name": "jerrybendy/chinese-administrative-division",
+    "description": "The administrative division of China",
+    "homepage": "https://github.com/jerrybendy/chinese-administrative-division",
+    "keywords": [
+        "administrative",
+        "division",
+        "china"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jerry Bendy",
+            "email": "jerry@icewingcc.com"
+        }
+    ],
+    "support": {
+        "email": "jerry@icewingcc.com",
+        "issues": "https://github.com/jerrybendy/chinese-administrative-division/issues"
+    },
+    "require": {
+        "php": ">=5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jerrybendy\\ChineseAdminDivision\\": "src/"
+        }
+    }
+}
