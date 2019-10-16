@@ -22,9 +22,17 @@
     "require": {
         "php": ">=5.4"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^8.4"
+    },
     "autoload": {
         "psr-4": {
             "Jerrybendy\\ChineseAdminDivision\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Test\\": "test/"
         }
     }
 }
