@@ -17,14 +17,14 @@ class AdminDivision extends Codes
      *
      * @return array
      */
-    public function getProvinces()
+    public static function getProvinces()
     {
         $ret = [];
-        foreach (self::CODES as $code => $value) {
-            if ($value[2] === '') {
+        foreach (self::$CODES as $code => $value) {
+            if ($code % 10000 === 0) {
                 array_push($ret, [
                     'code' => $code,
-                    'name' => $value[0],
+                    'name' => $value,
                 ]);
             }
         }
@@ -38,20 +38,20 @@ class AdminDivision extends Codes
      * @param integer $provinceId 省的代码
      * @return array
      */
-    public function getCities($provinceId)
+    public static function getCities($provinceId)
     {
         $ret = [];
-        $provinceId = (string)$provinceId;
+        $provinceId = intval($provinceId);
 
         if (!$provinceId) {
             return [];
         }
 
-        foreach (self::CODES as $code => $value) {
-            if ($value[1] === '' && $value[2] === $provinceId) {
+        foreach (self::$CODES as $code => $value) {
+            if ($code > $provinceId && $code < $provinceId + 9999 && $code % 100 === 0) {
                 array_push($ret, [
                     'code' => $code,
-                    'name' => $value[0],
+                    'name' => $value,
                 ]);
             }
         }
@@ -65,20 +65,20 @@ class AdminDivision extends Codes
      * @param integer $cityId 地级市的代码
      * @return array
      */
-    public function getDistricts($cityId)
+    public static function getDistricts($cityId)
     {
         $ret = [];
-        $cityId = (string)$cityId;
+        $cityId = intval($cityId);
 
         if (!$cityId) {
             return [];
         }
 
-        foreach (self::CODES as $code => $value) {
-            if ($value[1] === $cityId && $value[2]) {
+        foreach (self::$CODES as $code => $value) {
+            if ($code > $cityId && $code < $cityId + 99) {
                 array_push($ret, [
                     'code' => $code,
-                    'name' => $value[0],
+                    'name' => $value,
                 ]);
             }
         }
@@ -90,26 +90,21 @@ class AdminDivision extends Codes
      * 解析一个代码并返回所有的省、市、区数据
      * 用于不确定代码表示的行政级别，或需要返回所有级别数据的情景
      *
-     * @param $code
+     * @param int|string $code
      * @return array|null
      */
-    public function parse($code)
+    public static function parse($code)
     {
-        $code = (string)$code;
+        $code = intval($code);
 
-        if (!isset(self::CODES[$code])) {
+        if (!isset(self::$CODES[$code])) {
             return null;
         }
 
-        list($name, $cityCode, $provinceCode) = self::CODES[$code];
-
         return [
-            'province' => $this->parseProvince($provinceCode),
-            'city'     => $this->parseCity($cityCode),
-            'district' => $cityCode ? [
-                'code' => $code,
-                'name' => $name,
-            ] : null,
+            'province' => self::parseProvince($code),
+            'city' => self::parseCity($code),
+            'district' => self::parseDistrict($code),
         ];
     }
 
@@ -117,26 +112,21 @@ class AdminDivision extends Codes
      * 解析省份数据，返回省的代码和名称。
      * 不存在或传入代码不是省份时返回 null
      *
-     * @param $provinceCode
+     * @param int|string $provinceCode
      * @return array|null
      */
-    public function parseProvince($provinceCode)
+    public static function parseProvince($provinceCode)
     {
-        $provinceCode = (string)$provinceCode;
+        $provinceCode = intval($provinceCode);
+        $provinceCode = $provinceCode - ($provinceCode % 10000);
 
-        if (!$provinceCode || !isset(self::CODES[$provinceCode])) {
-            return null;
-        }
-
-        $value = self::CODES[$provinceCode];
-
-        if ($value[1] || $value[2]) {
+        if (!$provinceCode || !isset(self::$CODES[$provinceCode])) {
             return null;
         }
 
         return [
             'code' => $provinceCode,
-            'name' => $value[0],
+            'name' => self::$CODES[$provinceCode],
         ];
     }
 
@@ -144,26 +134,21 @@ class AdminDivision extends Codes
      * 解析城市数据，返回市的代码和名称。
      * 不存在或传入代码不是地级市时返回 null
      *
-     * @param $cityCode
+     * @param int|string $cityCode
      * @return array|null
      */
-    public function parseCity($cityCode)
+    public static function parseCity($cityCode)
     {
-        $cityCode = (string)$cityCode;
+        $cityCode = intval($cityCode);
+        $cityCode = $cityCode - ($cityCode % 100);
 
-        if (!$cityCode || !isset(self::CODES[$cityCode])) {
-            return null;
-        }
-
-        $value = self::CODES[$cityCode];
-
-        if ($value[1]) {
+        if (!$cityCode || $cityCode % 10000 === 0 || !isset(self::$CODES[$cityCode])) {
             return null;
         }
 
         return [
             'code' => $cityCode,
-            'name' => $value[0],
+            'name' => self::$CODES[$cityCode],
         ];
     }
 
@@ -175,23 +160,17 @@ class AdminDivision extends Codes
      * @param $districtCode
      * @return array|null
      */
-    public function parseDistrict($districtCode)
+    public static function parseDistrict($districtCode)
     {
-        $districtCode = (string)$districtCode;
+        $districtCode = intval($districtCode);
 
-        if (!$districtCode || !isset(self::CODES[$districtCode])) {
-            return null;
-        }
-
-        $value = self::CODES[$districtCode];
-
-        if (!$value[1]) {
+        if (!$districtCode || $districtCode % 100 === 0 || !isset(self::$CODES[$districtCode])) {
             return null;
         }
 
         return [
             'code' => $districtCode,
-            'name' => $value[0],
+            'name' => self::$CODES[$districtCode],
         ];
     }
 }
